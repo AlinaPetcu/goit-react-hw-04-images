@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React,  { useState, useEffect, useCallback } from 'react';
 import Searchbar from './Searchbar/Searchbar';
 import Button from './Button/Button';
 import Loader from './Loader/Loader';
@@ -13,22 +13,18 @@ import axios from 'axios';
 const API_KEY = '43883842-b75b0118b3b94ee5f5e6a6bfe';
 const BASE_URL = 'https://pixabay.com/api/';
 
-class App extends Component {
-  state = {
-    images: [],
-    query: '',
-    page: 1,
-    loading: false,
-    showModal: false,
-    selectedImage: null,
-  };
+const App = () => {
+  const [images, setImages] = useState([]);
+  const [query, setQuery] = useState('');
+  const [page, setPage] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const [selectedImage, setSelectedImage] = useState(null);
 
-  fetchImages = async () => {
-    const { query, page } = this.state;
-    this.setState({ loading: true });
-
+  const fetchImages = useCallback(async () => {
+    setLoading(true);
     try {
-      const response = await axios.get(`${BASE_URL}`, {
+      const response = await axios.get(BASE_URL, {
         params: {
           key: API_KEY,
           q: query,
@@ -37,58 +33,51 @@ class App extends Component {
           image_type: 'photo',
         },
       });
-      this.setState(prevState => ({
-        images: [...prevState.images, ...response.data.hits],
-        loading: false,
-      }));
+      setImages(prevImages => [...prevImages, ...response.data.hits]);
     } catch (error) {
       console.error('Error fetching data:', error);
-      this.setState({ loading: false });
+    } finally {
+      setLoading(false);
     }
+  }, [query, page]);
+
+  useEffect(() => {
+    if (query) {
+      fetchImages();
+    }
+  }, [query, page, fetchImages]);
+
+  const handleSearchSubmit = newQuery => {
+    setQuery(newQuery);
+    setImages([]);
+    setPage(1);
   };
 
-  handleSearchSubmit = query => {
-    this.setState({ query, images: [], page: 1 }, this.fetchImages);
+  const handleLoadMore = () => {
+    setPage(prevPage => prevPage + 1);
   };
 
-  handleLoadMore = () => {
-    this.setState(
-      prevState => ({ page: prevState.page + 1 }),
-      this.fetchImages
-    );
+  const toggleModal = (image = null) => {
+    setShowModal(prevShowModal => !prevShowModal);
+    setSelectedImage(image);
   };
 
-  toggleModal = (selectedImage = null) => {
-    this.setState(prevState => ({
-      showModal: !prevState.showModal,
-      selectedImage,
-    }));
-  };
+  return (
+    <div
+      style={{
+        display: 'grid',
+        gridTemplateColumns: '1fr',
+        gridGap: '16px',
+        paddingBottom: '24px',
+      }}
+    >
+      <Searchbar onSubmit={handleSearchSubmit} />
+      <ImageGallery images={images} onImageClick={toggleModal} />
+      {loading && <Loader />}
+      {images.length > 0 && !loading && <Button onClick={handleLoadMore} />}
+      {showModal && <Modal image={selectedImage} onClose={toggleModal} />}
+    </div>
+  );
+};
 
-  render() {
-    const { images, loading, showModal, selectedImage } = this.state;
-
-    return (
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: '1fr',
-          gridGap: '16px',
-          paddingBottom: '24px',
-        }}
-      >
-        <Searchbar onSubmit={this.handleSearchSubmit} />
-        <ImageGallery images={images} onImageClick={this.toggleModal} />
-        {loading && <Loader />}
-        {images.length > 0 && !loading && (
-          <Button onClick={this.handleLoadMore} />
-        )}
-        {showModal && (
-          <Modal image={selectedImage} onClose={this.toggleModal} />
-        )}
-      </div>
-    );
-  }
-}
-
-export { App };
+export { App }; 

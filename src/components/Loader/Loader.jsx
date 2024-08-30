@@ -1,9 +1,9 @@
-import React, { Component } from 'react';
+import React  from 'react';
 
 import { Audio } from 'react-loader-spinner';
 
-export default class CustomLoader extends Component {
-  render() {
+const CustomLoader = () => {
+ 
     return (
       <div
         style={{
@@ -25,5 +25,7 @@ export default class CustomLoader extends Component {
         ;
       </div>
     );
-  }
+  
 }
+
+export default CustomLoader;

@@ -3,12 +3,13 @@
         grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
         gap: 16px;
         list-style: none;
-        margin: 0;
+        margin: 100px 25px;
         padding: 0;
 }
 
 .ImageGalleryItem {
-  border-radius: 8px;
+  position: relative;
+  border-radius: 5px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   overflow: hidden;
   transition: transform 0.3s ease;

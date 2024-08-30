@@ -1,25 +1,28 @@
-import { Component } from 'react';
-
+import { useEffect } from 'react';
 import * as basicLightbox from 'basiclightbox';
 import 'basiclightbox/dist/basicLightbox.min.css';
+import PropTypes from 'prop-types';
 
-class Modal extends Component {
-  componentDidMount() {
-    this.instance = basicLightbox.create(`
-      <img src="${this.props.image}" alt="" />
+
+const Modal = ({ image }) => {
+  useEffect(() => {
+    const instance = basicLightbox.create(`
+      <img src="${image}" alt="Large view" />
     `);
-    this.instance.show();
-  }
+    instance.show();
 
-  componentWillUnmount() {
-    if (this.instance.visible()) {
-      this.instance.close();
-    }
-  }
+    return () => {
+      if (instance.visible()) {
+        instance.close();
+      }
+    };
+  }, [image]); // Dependency array should include `image`
 
-  render() {
-    return null;
-  }
-}
+  return null;
+};
+
+Modal.propTypes = {
+  image: PropTypes.string.isRequired,
+};
 
 export default Modal;
